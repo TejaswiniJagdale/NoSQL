@@ -1,0 +1,228 @@
+
+Q1.
+Create Employee table
+
+
+1. Create table employee(
+Empid int,
+Emp_salary int,
+Emp_lastname varchar,
+Emp_firstname text,
+Emp_dob date,
+Emp_deptno int,
+Emp_comm float,
+Primary key((Empid,Emp_salary),Emp_firstname,emp_dob)
+
+
+-------------------------------------------------------
+What is output of following query
+1. Select * from employee
+Where empid in (1001,1002)
+
+
+cqlsh:hr11> select * from employee1
+        ... where empid in (1001,1002);
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+
+
+cqlsh:hr11> select * from employee1
+        ... where empid in (1001,1002) and emp_salary in (5000,6000);
+
+ empid | emp_salary | emp_firstname | emp_dob    | emp_comm | emp_deptno | emp_lastname
+-------+------------+---------------+------------+----------+------------+--------------
+  1001 |       5000 |         Rajan | 1999-11-11 |      100 |         10 |        Barve
+  1002 |       6000 |        Ranjan | 1998-10-11 |      200 |         11 |        kuwar
+
+(2 rows)
+
+-------------------------------------------------------
+2. Select * from employee
+Where empid=1001 and emp_dob=’1999-11-11’ and emp_salary=5000 and
+emp_firstname=’Rajan’
+
+cqlsh:hr11> select * from employee1
+        ... where empid=1001 and emp_dob='1999-11-11' and emp_salary=5000 and emp_firstname='Rajan';
+
+ empid | emp_salary | emp_firstname | emp_dob    | emp_comm | emp_deptno | emp_lastname
+-------+------------+---------------+------------+----------+------------+--------------
+  1001 |       5000 |         Rajan | 1999-11-11 |      100 |         10 |        Barve
+
+(1 rows)
+
+-------------------------------------------------------
+3. Select * from employee
+Where empid=1001 and emp_dob=’1999-11-11’ and emp_salary>2000 and
+emp_firstname=’Rajan’
+
+
+cqlsh:hr11> select * from employee1
+        ... where empid=1001 and emp_dob='1999-11-11' and emp_salary>2000 and emp_firstname='Rajan';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+
+
+
+cqlsh:hr11> select * from employee1
+        ... where empid=1001 and emp_dob='1999-11-11' and emp_salary>2000 and emp_firstname='Rajan' ALLOW FILTERING;
+
+ empid | emp_salary | emp_firstname | emp_dob    | emp_comm | emp_deptno | emp_lastname
+-------+------------+---------------+------------+----------+------------+--------------
+  1001 |       5000 |         Rajan | 1999-11-11 |      100 |         10 |        Barve
+
+(1 rows)
+
+
+------------------------------------------------------
+4. Select * from employee
+Where empid=1001 and emp_dob=’1999-11-11’ and emp_salary>5000 and
+emp_salary<15000
+
+cqlsh:hr11> select * from employee1
+        ... where empid=1001 and emp_dob='1999-11-11' and emp_salary>5000 and emp_salary<15000 ALLOW FILTERING;
+
+ empid | emp_salary | emp_firstname | emp_dob | emp_comm | emp_deptno | emp_lastname
+-------+------------+---------------+---------+----------+------------+--------------
+
+(0 rows)
+-------------------------------------------------------
+5. Select * from employee
+Where empid=1001 and emp_dob=’1999-11-11’ and emp_salary>5000 and emp_deptno>10
+
+cqlsh:hr11> select * from employee1
+        ... where empid=1001 and emp_dob='1999-11-11' and emp_salary>5000 and emp_deptno>10;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+
+
+-------------------------------------------------------
+6. Select * from employee
+Where empid=1001 and emp_dob=’1999-11-11’ and emp_salary>5000 and emp_dept>10
+ALLOW FILTERING;
+
+cqlsh:hr11> select * from employee1
+        ... where empid=1001 and emp_dob='1999-11-11' and emp_salary>5000 and emp_deptno>10 allow filtering;
+
+ empid | emp_salary | emp_firstname | emp_dob | emp_comm | emp_deptno | emp_lastname
+-------+------------+---------------+---------+----------+------------+--------------
+
+(0 rows)
+
+
+************************************************************************************************************
+
+
+
+2.Create table to store information about singer, use appropriate collections to store data
+Sid and name will be primary key
+Sid integer, name string, store list of songs he/she sung, store list of music directors names and how
+many songs he sung with the director, store names of studios where recordings have been done and
+how many times recording has been done in the studio, also store movie, director name and song in
+
+A.Write query to add new director name and count 1 in the table
+
+cqlsh:hr11> update singer
+        ... set movie_director='Imtiaz Ali'
+        ... where sid=1 and sname='Shreya';
+-------------------------------------------------------
+
+B. List all records of ‘sonu nigam’
+
+cqlsh:hr11> select sname,songs from singer where sid=3 and sname='Sonu nigam';
+
+ sname      | songs
+------------+-----------------------------------------------------------
+ Sonu nigam | ['its the time to disco', 'preety woman', 'Kal ho na ho']
+
+(1 rows)
+-------------------------------------------------------
+C. Add new studio in ‘shan’ and ‘shreya’s list
+
+cqlsh:hr11> update singer
+        ... set studio_names=studio_names+{'cokestudio':8}
+        ... where sid=2 and sname='Shan';
+cqlsh:hr11> update singer
+        ... set studio_names=studio_names+{'mtv':4}
+        ... where sid=1 and sname='Shreya';
+cqlsh:hr11> select * from singer;
+
+ sid | sname      | movie         | movie_director | music_director   | songs                                                      | studio_names                   | total_songs
+-----+------------+---------------+----------------+------------------+------------------------------------------------------------+--------------------------------+-------------
+   1 |     Shreya | mughal-e-azam |          Sallu |    {'Pritam': 5} |                      ['mehbooba', 'jiya jale', 'dhadakan'] |      {'T-series': 5, 'mtv': 4} |           5
+   2 |       Shan |      3-idiots |      Amir khan | {'AR Rehman': 4} | ['behti hawa sa tha wo', 'behka me behka', 'jhoobi doobi'] | {'Zmusic': 6, 'cokestudio': 8} |           6
+   3 | Sonu nigam |  Kal ho na ho |            SRK |    {'Pritam': 8} |  ['its the time to disco', 'preety woman', 'Kal ho na ho'] |               {'SonyMusic': 7} |           8
+
+(3 rows)
+
+
+-------------------------------------------------------
+D. Perform batch operation to insert 2 records and delete 1 record from above
+table
+
+cqlsh:hr11> BEGIN BATCH
+        ... insert into singer(sid,sname,movie,movie_director,music_director,songs,studio_names,total_songs)values(4,'kk','gangster','mahesh bhatt',{'sskreem':7},['bheegi bheegi','ya ali','kya mujhe pyar hai'],{'venus':9},9);
+        ... insert into singer(sid,sname,movie,movie_director,music_director,songs,studio_names,total_songs)values(5,'kumar sanu','gunda','Sanjay lila Bhansali',{'shankar EL':8},['o sanam','raja ki aayegi barat','ramaya vastavaya'],{'starmusic':9},9);
+        ... delete from singer where sid=5 and sname='kumar sanu';
+        ... APPLY BATCH;
+cqlsh:hr11> select * from singer;
+
+ sid | sname      | movie         | movie_director | music_director   | songs                                                      | studio_names                   | total_songs
+-----+------------+---------------+----------------+------------------+------------------------------------------------------------+--------------------------------+-------------
+   1 |     Shreya | mughal-e-azam |          Sallu |    {'Pritam': 5} |                      ['mehbooba', 'jiya jale', 'dhadakan'] |      {'T-series': 5, 'mtv': 4} |           5
+   2 |       Shan |      3-idiots |      Amir khan | {'AR Rehman': 4} | ['behti hawa sa tha wo', 'behka me behka', 'jhoobi doobi'] | {'Zmusic': 6, 'cokestudio': 8} |           6
+   4 |         kk |      gangster |   mahesh bhatt |   {'sskreem': 7} |          ['bheegi bheegi', 'ya ali', 'kya mujhe pyar hai'] |                   {'venus': 9} |           9
+   3 | Sonu nigam |  Kal ho na ho |            SRK |    {'Pritam': 8} |  ['its the time to disco', 'preety woman', 'Kal ho na ho'] |               {'SonyMusic': 7} |           8
+
+(4 rows)
+
+-------------------------------------------------------
+E. Delete list of studios and movies from above table from ‘shan’ and ‘sonu nigam’s
+record.
+
+cqlsh:hr11> delete studio_names['Zmusic'] from singer where sid=2 and sname='Shan';
+cqlsh:hr11> delete studio_names['SonyMusic'] from singer where sid=3 and sname='Sonu nigam';
+cqlsh:hr11> delete movie from singer where sid=3 and sname='Sonu nigam';
+cqlsh:hr11> delete movie from singer where sid=2 and sname='Shan';
+
+
+************************************************************************************************************
+
+
+3. Create a data type to store information about server. For each server store id, name, ram
+capacity. Create a table lacation to store bldgname,floor number and list of servers on the
+floor. Building name is primary key and floor number is cluster key
+
+
+cqlsh:hr11> select * from location;
+
+ bldgname | floorno | loserver
+----------+---------+----------------------------------------------------------------------------
+        C |       5 | ({sid: 70, name: 'zxxd', ram: 45464}, {sid: 90, name: 'fdcc', ram: 86545})
+        B |       1 |   ({sid: 30, name: 'dccd', ram: 5000}, {sid: 40, name: 'ddcc', ram: 6589})
+        B |       2 |   ({sid: 60, name: 'zccd', ram: 2040}, {sid: 50, name: 'mdcc', ram: 6545})
+        A |       1 |   ({sid: 10, name: 'aaaa', ram: 1024}, {sid: 20, name: 'bbbb', ram: 2048})
+        A |       2 |   ({sid: 40, name: 'dddd', ram: 1024}, {sid: 30, name: 'cccc', ram: 3072})
+
+(5 rows)
+
+
+-------------------------------------------------------
+a. Find list of all servers from ‘A’ building and floor number > 5
+
+cqlsh:hr11> select loserver from location where bldgname='A' and floorno>5;
+
+ loserver
+----------
+
+-------------------------------------------------------
+b. Find list of all servers from ‘A’,’B’,’C’ building.
+
+
+cqlsh:hr11> select bldgname,loserver from location where bldgname in ('A','B','C');
+
+ bldgname | loserver
+----------+----------------------------------------------------------------------------
+        A |   ({sid: 10, name: 'aaaa', ram: 1024}, {sid: 20, name: 'bbbb', ram: 2048})
+        A |   ({sid: 40, name: 'dddd', ram: 1024}, {sid: 30, name: 'cccc', ram: 3072})
+        B |   ({sid: 30, name: 'dccd', ram: 5000}, {sid: 40, name: 'ddcc', ram: 6589})
+        B |   ({sid: 60, name: 'zccd', ram: 2040}, {sid: 50, name: 'mdcc', ram: 6545})
+        C | ({sid: 70, name: 'zxxd', ram: 45464}, {sid: 90, name: 'fdcc', ram: 86545})
+
+(5 rows)
